@@ -2,6 +2,7 @@ import TaskList from './components/TaskList.jsx';
 import './App.css';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
+import NewTaskForm from './components/NewTaskForm.jsx';
 
 
 const kbaseURL = 'http://localhost:5000';
@@ -22,6 +23,11 @@ const convertFromAPI = (task) => {
     isComplete: !!task.is_complete,
     completedAt: task.completed_at || null
   };
+};
+
+const addTaskAPI = (newTask) => {
+  return axios.post(`${kbaseURL}/tasks`, newTask)
+    .catch(error => console.log(error));
 };
 
 const markCompleteAPI = id => {
@@ -75,6 +81,13 @@ const App = () => {
       });
   };
 
+  const onHandleSubmit = (data) => {
+    return addTaskAPI(data)
+      .then((result) => {
+        setTasks((prevTasks) => [convertFromAPI(result.data), ...prevTasks]);
+      });
+  };
+
   return (
     <div className="App">
       <header className="App-header">
@@ -85,7 +98,9 @@ const App = () => {
           tasks={tasks}
           onToggleComplete={toggleComplete}
           deleteTask={deleteTask}
-        />}</div>
+        />}
+        </div>
+        <NewTaskForm onHandleSubmit={onHandleSubmit}/>
       </main>
     </div>
   );
