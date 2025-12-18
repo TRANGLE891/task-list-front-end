@@ -1,33 +1,37 @@
 import TaskList from './components/TaskList.jsx';
 import './App.css';
-import { useState } from 'react';
+import { deleteTask, getTasks } from './apis/tasks.js';
+import { useEffect, useState } from 'react';
+import { toggleComplete, toggleIncomplete } from './apis/tasks.js';
 
-const TASKS = [
-  {
-    id: 1,
-    title: 'Mow the lawn',
-    isComplete: false,
-  },
-  {
-    id: 2,
-    title: 'Cook Pasta',
-    isComplete: true,
-  },
-];
 
 const App = () => {
-  const [tasks, setTasks] = useState(TASKS);
+  // const toggleComplete = (id) => {
+  //   // setTasks(prevTasks =>
+  //   //   prevTasks.map(task =>
+  //   //     task.id === id ? { ...task, isComplete: !task.isComplete } : task
+  //   //   )
+  //   // );
+  // };
 
-  const toggleComplete = (id) => {
-    setTasks(prevTasks =>
-      prevTasks.map(task =>
-        task.id === id ? { ...task, isComplete: !task.isComplete } : task
-      )
-    );
+  const deleteTaskCallback = async (id) => {
+    await deleteTask(id);
+    getTasks().then((data) => setTasks(data));
+    //setTasks(prevTasks => prevTasks.filter(task => task.id !== id));
   };
 
-  const deleteTask = (id) => {
-    setTasks(prevTasks => prevTasks.filter(task => task.id !== id));
+  const [tasks, setTasks] = useState([]);
+  useEffect(() => {
+    getTasks().then((data) => setTasks(data));
+  }, []);
+
+  const toggleCompleteCallback = async (id, newIsComplete) => {
+    if (newIsComplete) {
+      await toggleComplete(id);
+    } else {
+      await toggleIncomplete(id);
+    }
+    getTasks().then((data) => setTasks(data));
   };
 
   return (
@@ -38,8 +42,8 @@ const App = () => {
       <main>
         <div>{<TaskList
           tasks={tasks}
-          onToggleComplete={toggleComplete}
-          deleteTask={deleteTask}
+          onToggleComplete={toggleCompleteCallback}
+          deleteTask={deleteTaskCallback}
         />}</div>
       </main>
     </div>
