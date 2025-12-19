@@ -2,32 +2,53 @@ import { useState } from 'react';
 import './NewTaskForm.css';
 import PropTypes from 'prop-types';
 
-const NewTaskForm = ({ onHandleSubmit }) => {
-  const [task, setTask] = useState('Enter new task');
+const kDefaultsFormState = {
+  title: '',
+  description: '',
+};
 
-  const handlerTaskChange = (event) => {
-    // console.log(event.target.value);
-    setTask(event.target.value);
+const NewTaskForm = ({ onHandleSubmit }) => {
+  const [formData, setFormData] = useState(kDefaultsFormState);
+
+  const handleChange = (event) => {
+    const inputName = event.target.name;
+    const inputValue = event.target.value;
+
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      [inputName]: inputValue,
+    }));
   };
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    if (!task.trim()) return;
+    onHandleSubmit(formData);
+    setFormData(kDefaultsFormState);
+  };
 
-    const newTask = {
-      title: task,
-      description: 'new one',
-      completedAt: null
-    };
-    onHandleSubmit(newTask);
-    setTask('');
+  const makeControllInput = (inputName) => {
+    return (
+      <input
+        type='text'
+        name={inputName}
+        value={formData[inputName]}
+        id={`${inputName}`}
+        onChange={handleChange}
+      />
+    );
   };
 
   return (
     <div className="new-task-form">
       <form onSubmit={handleSubmit}>
-        <label htmlFor="newTask">New Task:</label>
-        <input type="text" id="newTask" name="newTask" value={task} onChange={handlerTaskChange}/>
+        <div>
+          <label htmlFor="title">New Task:</label>
+          {makeControllInput('title')}
+        </div>
+        <div>
+          <label htmlFor="description">Description:</label>
+          {makeControllInput('description')}
+        </div>
         <div>
           <input type="submit" value="Add a task"/>
         </div>
